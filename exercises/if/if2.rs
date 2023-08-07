@@ -13,7 +13,7 @@ pub fn foo_if_fizz(fizzish: &str) -> &str {
     } else if fizzish == "fuzz"{
         "bar"
     }else {
-        baz
+        "baz"
     }
 }
 
