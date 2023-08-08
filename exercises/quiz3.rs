@@ -16,16 +16,19 @@
 //
 // Execute `rustlings hint quiz3` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
+
 
 pub struct ReportCard {
-    pub grade: f32,
+    pub grade: T,
     pub student_name: String,
     pub student_age: u8,
 }
 
 impl ReportCard {
-    pub fn print(&self) -> String {
+    pub fn print(&self) -> String 
+    where 
+        T: std::fmt::Display,    
+    {
         format!("{} ({}) - achieved a grade of {}",
             &self.student_name, &self.student_age, &self.grade)
     }
