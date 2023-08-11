@@ -5,7 +5,7 @@
 // Execute `rustlings hint enums3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+
 
 enum Message {
     ChangeColor(u32,u32,u32),
