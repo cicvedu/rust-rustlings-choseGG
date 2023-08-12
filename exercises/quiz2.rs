@@ -35,21 +35,23 @@ mod my_module {
     pub fn transformer(input:Vec<(String,Command)>) -> Vec<String> {
         // TODO: Complete the output declaration!
         let mut output: Vec<String> = vec![];
-        for (mut string, command) in input.iter() {
+        for (string, command) in input {
             match command{
                 Command::Uppercase =>{
-                    string = string.to_uppercase();
+                    let new_string = string.to_uppercase();
+                    output.push(new_string);
                 }
                 Command::Trim =>{
-                    string = string.trim().to_string();
+                    let new_string = string.trim().to_string();
+                    output.push(new_string);
                 }
                 Command::Append(times) =>{
-                    for _ in 0..times{
-                        string.push_str("bar");
-                    }
+                    let new_string:String = std::iter::repeat("bar").take(times).collect();
+                    let appended  =string + &new_string;
+                    output.push(appended);
                 }
             } 
-            output.push(string);// TODO: Complete the function body. You can do it!
+            // TODO: Complete the function body. You can do it!
         }
         output
     }
