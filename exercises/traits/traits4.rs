@@ -6,8 +6,6 @@
 //
 // Execute `rustlings hint traits4` or use the `hint` watch subcommand for a
 // hint.
-
-
 pub trait Licensed {
     fn licensing_info(&self) -> String {
         "some information".to_string()
