@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - 'README.md'
-      # - '.github/**'
+      - '.github/**'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -23,45 +23,49 @@ jobs:
       points: ${{ steps.autograding.outputs.points}}
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Run tests
+    - name: Set Up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - name: Run Tests
       run: cargo test --test cicv --verbose
-    - uses: yfblock/os-autograding@master
+      env:
+        TEST_FOO: 123 # 修改 TEST_FOO 的值
+        FEATURE: pass # 修改 FEATURE 的值
+    - name: Run Autograding
+      uses: yfblock/os-autograding@master
       id: autograding
       with:
         outputFile: .github/result/check_result.json
+
   deploy:
-    name: Deploy to pages
+    name: Deploy to Pages
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        continue-on-error: true
-        with:
-          ref: 'gh-pages'
       - name: Save Log File
         run: |
           mkdir autograding_logs
           cd autograding_logs
-          if [  -f "../latest.json"  ]; then
-              cp ../latest.json older.json
+          if [ -f "../latest.json" ]; then
+            cp ../latest.json older.json
           else
-              echo "{}" > older.json
+            echo "{}" > older.json
           fi
-          FILE_NAME=`date +%Y_%m_%d_%H_%M_%S`.txt
-          echo -ne "${{ needs.build.outputs.details }}\n" > $FILE_NAME
-          echo -ne "Points: ${{ needs.build.outputs.points }}" >> $FILE_NAME
+          FILE_NAME=$(date +%Y_%m_%d_%H_%M_%S).txt
+          echo -e "needs.build.outputs.details:\nneeds.build.outputs.details">{{ needs.build.outputs.details }}" > FILE_NAME
+          echo -e "Points: needs.build.outputs.points">>{{ needs.build.outputs.points }}" >> FILE_NAME
           cat older.json | jq ".default |= \"$FILE_NAME\"" > latest.json
           rm older.json
-          echo -ne "# Got Points\n" > README.md
+          echo -e "# Got Points\n" > README.md
           echo "![Points bar](../../blob/gh-pages/points-badge.svg)" >> README.md
-      - name: Make points svg
+      - name: Make Points SVG
         uses: markpatterson27/points-bar@v1
         with:
-          points: '${{ needs.build.outputs.points }}'
+          points: ${{ needs.build.outputs.points }}
           path: 'autograding_logs/points-badge.svg'
           type: 'badge'
-      - name: GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: gh-pages
