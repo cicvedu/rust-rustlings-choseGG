@@ -1,12 +1,4 @@
-// threads3.rs
-//
-// Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
-// hint.
-
-// I AM NOT DONE
-
-use std::sync::mpsc;
-use std::sync::Arc;
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -26,41 +18,51 @@ impl Queue {
     }
 }
 
-fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
-    let qc = Arc::new(q);
-    let qc1 = Arc::clone(&qc);
-    let qc2 = Arc::clone(&qc);
+fn send_tx(q: Arc<Mutex<Queue>>, tx: mpsc::Sender<u32>) {
+    let thread1 = {
+        let q = Arc::clone(&q);
+        let tx = tx.clone();
+        thread::spawn(move || {
+            let q = q.lock().unwrap();
+            for val in &q.first_half {
+                println!("sending {:?}", val);
+                tx.send(*val).unwrap();
+                thread::sleep(Duration::from_secs(1));
+            }
+        })
+    };
 
-    thread::spawn(move || {
-        for val in &qc1.first_half {
-            println!("sending {:?}", val);
-            tx.send(*val).unwrap();
-            thread::sleep(Duration::from_secs(1));
-        }
-    });
+    let thread2 = {
+        let q = Arc::clone(&q);
+        let tx = tx.clone();
+        thread::spawn(move || {
+            let q = q.lock().unwrap();
+            for val in &q.second_half {
+                println!("sending {:?}", val);
+                tx.send(*val).unwrap();
+                thread::sleep(Duration::from_secs(1));
+            }
+        })
+    };
 
-    thread::spawn(move || {
-        for val in &qc2.second_half {
-            println!("sending {:?}", val);
-            tx.send(*val).unwrap();
-            thread::sleep(Duration::from_secs(1));
-        }
-    });
+    thread1.join().unwrap();
+    thread2.join().unwrap();
 }
 
 fn main() {
     let (tx, rx) = mpsc::channel();
-    let queue = Queue::new();
-    let queue_length = queue.length;
+    let queue = Arc::new(Mutex::new(Queue::new()));
+    let queue_length = queue.lock().unwrap().length;
 
-    send_tx(queue, tx);
+    send_tx(Arc::clone(&queue), tx);
 
     let mut total_received: u32 = 0;
-    for received in rx {
+    let timeout = Duration::from_secs(queue_length as u64 * 2); // increase timeout to avoid prematurely exit
+    while let Ok(received) = rx.recv_timeout(timeout) {
         println!("Got: {}", received);
         total_received += 1;
     }
 
     println!("total numbers received: {}", total_received);
-    assert_eq!(total_received, queue_length)
+    assert_eq!(total_received, queue_length);
 }

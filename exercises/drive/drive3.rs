@@ -3,8 +3,6 @@
 // Execute `rustlings hint drive1` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
 // We look for an environment variable and expect it to fall in a range.
 // look into the testcase to find out the details.
 // You should not modify this file. Modify `build.rs` to pass this exercise.
