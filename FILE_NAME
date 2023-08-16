@@ -1,0 +1,3 @@
+needs.build.outputs.details
+ needs.build.outputs.details }}n > FILE_NAME
+echo -ne Points: needs.build.outputs.points>>{{ needs.build.outputs.points }}
